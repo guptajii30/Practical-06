@@ -1,0 +1,43 @@
+---
+- name: Deploy NodeJS App using Pull Model
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Install curl and Node.js
+      become: yes
+      apt:
+        name:
+          - curl
+          - nodejs
+          - npm
+        state: present
+        update_cache: yes
+
+    - name: Ensure /opt/nodeapp directory exists
+      become: yes
+      file:
+        path: /opt/nodeapp
+        state: directory
+        mode: '0755'
+
+    - name: Copy app files to /opt/nodeapp
+      become: yes
+      copy:
+        src: "{{ item }}"
+        dest: "/opt/nodeapp/"
+        mode: '0644'
+      loop:
+        - index.js
+        - package.json
+
+    - name: Install node dependencies
+      become: yes
+      command: npm install
+      args:
+        chdir: /opt/nodeapp
+
+    - name: Run the Node.js app (background)
+      become: yes
+      shell: "nohup node index.js > /opt/nodeapp/app.log 2>&1 &"
+      args:
+        chdir: /opt/nodeapp
