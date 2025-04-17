@@ -1,7 +1,39 @@
 ---
-- name: Hello World Pull Playbook
+- name: Deploy NodeJS App using Pull Model
   hosts: localhost
+  connection: local
   tasks:
-    - name: Print hello world
-      debug: 
-        msg: "Hello World from ansible pull"
+    # ... (your existing tasks for apt, directory creation, etc) ...
+
+    # Add these new tasks AFTER your "npm install" task but BEFORE the "Run" task
+    - name: Install PM2 globally
+      become: yes
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Stop existing app if running
+      become: yes
+      command: pm2 delete nodeapp
+      ignore_errors: yes
+      args:
+        chdir: /opt/nodeapp
+
+    # Replace your current "Run the Node.js app" task with this:
+    - name: Start application with PM2
+      become: yes
+      command: pm2 start index.js --name nodeapp
+      args:
+        chdir: /opt/nodeapp
+
+    # Optional: Add PM2 startup script
+    - name: Configure PM2 to start on boot
+      become: yes
+      command: pm2 startup
+      register: pm2_startup
+      changed_when: false
+
+    - name: Save PM2 process list
+      become: yes
+      command: pm2 save
+      when: pm2_startup is not skipped
