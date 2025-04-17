@@ -1,16 +1,10 @@
-const https = require('https');
-const fs = require('fs');
+const http = require('http');
 
 const port = 3000;
-const options = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
-};
-
-const server = https.createServer(options, (req, res) => {
+const server = http.createServer((req, res) => {
   res.end('Welcome to the NodeJS app deployed by Ansible Pull!');
 });
 
 server.listen(port, () => {
-  console.log(`HTTPS server running at https://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
