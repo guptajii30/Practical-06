@@ -1,0 +1,39 @@
+---
+- name: Configuration Management Example
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+    - name: Ensure user "ganesh" exists
+      user:
+        name: tejas
+        state: present
+        shell: /bin/bash
+        create_home: yes
+
+    - name: Ensure directory /opt/project exists
+      file:
+        path: /opt/project
+        state: directory
+        mode: '0755'
+
+    - name: Ensure /opt/project/config.txt file exists with content
+      copy:
+        dest: /opt/project/config.txt
+        content: |
+          # Project Configurations
+          app_mode = "development"
+          version = 1.0
+        mode: '0644'
+
+    - name: Install and start nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure nginx is running and enabled
+      service:
+        name: nginx
+        state: started
+        enabled: yes
